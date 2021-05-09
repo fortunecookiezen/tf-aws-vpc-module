@@ -1,5 +1,18 @@
+## booleans first
 variable "create_vpc" {
   description = "Controls if VPC should be created (it affects almost all resources)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_dns_hostnames" {
+  description = "Should be true to enable DNS hostnames in the VPC"
+  type        = bool
+  default     = false
+}
+
+variable "enable_dns_support" {
+  description = "Should be true to enable DNS support in the VPC"
   type        = bool
   default     = true
 }
