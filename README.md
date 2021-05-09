@@ -8,9 +8,9 @@ Please use the official [aws vpc terraform module](https://registry.terraform.io
 
 See examples
 
-```
+``` shell
 module "vpc" {
-  source = "../"
+  source = "github.com/fortunecookiezen/tf-aws-vpc-module"
   name   = "vpc"
   cidr   = "10.10.0.0/20"
 
