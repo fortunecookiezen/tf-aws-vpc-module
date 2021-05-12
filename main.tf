@@ -17,6 +17,9 @@ resource "aws_vpc" "this" {
 # manage the default security group, no ingress or egress mean no rules
 resource "aws_default_security_group" "this" {
   vpc_id = aws_vpc.this[0].id
+  tags = {
+    "Name" = "default"
+  }
 }
 
 #manage the default network acl to detect drift
@@ -39,5 +42,8 @@ resource "aws_default_network_acl" "this" {
     cidr_block = "0.0.0.0/0"
     from_port  = 0
     to_port    = 0
+  }
+  tags = {
+    "Name" = "default"
   }
 }
