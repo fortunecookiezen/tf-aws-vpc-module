@@ -62,7 +62,7 @@ resource "aws_default_network_acl" "this" {
     protocol   = -1
     rule_no    = 100
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = aws_vpc.this[0].cidr_block
     from_port  = 0
     to_port    = 0
   }
