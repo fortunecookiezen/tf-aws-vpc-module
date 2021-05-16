@@ -81,7 +81,29 @@ resource "aws_default_network_acl" "this" {
 }
 
 #
-# Subnets
+# GATEWAYS
+#
+
+resource "aws_internet_gateway" "this" {
+  count = var.create_vpc && var.create_igw && length(var.public_subnets) > 0 ? 1 : 0
+
+  vpc_id = local.vpc_id
+
+  tags = merge(
+    {
+      "Name" = format("%s", var.name)
+    },
+    var.tags,
+    var.igw_tags,
+  )
+}
+
+#
+# ROUTES & ROUTE TABLES
+#
+
+#
+# PUBLIC SUBNETS
 #
 resource "aws_subnet" "public" {
   count = var.create_vpc && length(var.public_subnets) > 0 && (length(var.public_subnets) >= length(var.azs)) ? length(var.public_subnets) : 0
@@ -106,6 +128,10 @@ resource "aws_subnet" "public" {
   )
 }
 
+#
+# PRIVATE SUBNETS
+#
+
 resource "aws_subnet" "private" {
   count = var.create_vpc && length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
 
@@ -127,6 +153,10 @@ resource "aws_subnet" "private" {
     var.private_subnet_tags,
   )
 }
+
+#
+# ISOLATED SUBNETS
+#
 
 resource "aws_subnet" "isolated" {
   count = var.create_vpc && length(var.isolated_subnets) > 0 ? length(var.isolated_subnets) : 0
