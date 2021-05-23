@@ -24,9 +24,9 @@ variable "enable_nat_gateway" {
 }
 
 variable "map_public_ip_on_launch" {
-  description = "Should be false if you do not want to auto-assign public IP on launch"
+  description = "Should be false if you do not want to auto-assign public IP on launch to instances in public subnets"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_igw" {
