@@ -27,7 +27,7 @@ resource "aws_vpc" "this" {
   tags = merge(
     {
       "Name"   = format("%s", var.name)
-      "Region" = data.aws_region.current.name
+      "Region" = format("%s", data.aws_region.current.name)
     },
     var.tags,
     var.vpc_tags,
@@ -106,12 +106,12 @@ resource "aws_internet_gateway" "this" {
 # PUBLIC SUBNETS
 #
 resource "aws_subnet" "public" {
-  count = var.create_vpc && length(var.public_subnets) > 0 && (length(var.public_subnets) >= length(var.azs)) ? length(var.public_subnets) : 0
+  count = var.create_vpc && length(var.public_subnets) > 0 && (length(var.public_subnets) <= length(data.aws_availability_zones.azs)) ? length(var.public_subnets) : 0
 
-  vpc_id                          = local.vpc_id
-  cidr_block                      = element(concat(var.public_subnets, [""]), count.index)
-  availability_zone               = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
-  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  vpc_id            = local.vpc_id
+  cidr_block        = element(concat(var.public_subnets, [""]), count.index)
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
+  # availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
   map_public_ip_on_launch         = var.map_public_ip_on_launch
   assign_ipv6_address_on_creation = false
 
@@ -120,7 +120,7 @@ resource "aws_subnet" "public" {
       "Name" = format(
         "%s-${var.public_subnet_suffix}-%s",
         var.name,
-        element(var.azs, count.index),
+        data.aws_availability_zones.azs.names[count.index]
       )
     },
     var.tags,
@@ -135,10 +135,10 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   count = var.create_vpc && length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
 
-  vpc_id                          = local.vpc_id
-  cidr_block                      = var.private_subnets[count.index]
-  availability_zone               = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
-  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  vpc_id            = local.vpc_id
+  cidr_block        = var.private_subnets[count.index]
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
+  #  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
   assign_ipv6_address_on_creation = false
 
   tags = merge(
@@ -146,7 +146,7 @@ resource "aws_subnet" "private" {
       "Name" = format(
         "%s-${var.private_subnet_suffix}-%s",
         var.name,
-        element(var.azs, count.index),
+        data.aws_availability_zones.azs.names[count.index]
       )
     },
     var.tags,
@@ -161,10 +161,10 @@ resource "aws_subnet" "private" {
 resource "aws_subnet" "isolated" {
   count = var.create_vpc && length(var.isolated_subnets) > 0 ? length(var.isolated_subnets) : 0
 
-  vpc_id                          = local.vpc_id
-  cidr_block                      = var.isolated_subnets[count.index]
-  availability_zone               = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
-  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  vpc_id            = local.vpc_id
+  cidr_block        = var.isolated_subnets[count.index]
+  availability_zone = data.aws_availability_zones.azs.names[count.index]
+  #  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
   assign_ipv6_address_on_creation = false
 
   tags = merge(
@@ -172,7 +172,7 @@ resource "aws_subnet" "isolated" {
       "Name" = format(
         "%s-${var.isolated_subnet_suffix}-%s",
         var.name,
-        element(var.azs, count.index),
+        data.aws_availability_zones.azs.names[count.index]
       )
     },
     var.tags,

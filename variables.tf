@@ -32,7 +32,7 @@ variable "map_public_ip_on_launch" {
 variable "create_igw" {
   description = "Controls if an Internet Gateway is created for public subnets and the related routes that connect them."
   type        = bool
-  default     = true
+  default     = false
 }
 
 # strings
