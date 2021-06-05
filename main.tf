@@ -108,10 +108,9 @@ resource "aws_internet_gateway" "this" {
 resource "aws_subnet" "public" {
   count = var.create_vpc && length(var.public_subnets) > 0 && (length(var.public_subnets) <= length(data.aws_availability_zones.azs)) ? length(var.public_subnets) : 0
 
-  vpc_id            = local.vpc_id
-  cidr_block        = element(concat(var.public_subnets, [""]), count.index)
-  availability_zone = data.aws_availability_zones.azs.names[count.index]
-  # availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  vpc_id                          = local.vpc_id
+  cidr_block                      = element(concat(var.public_subnets, [""]), count.index)
+  availability_zone               = data.aws_availability_zones.azs.names[count.index]
   map_public_ip_on_launch         = var.map_public_ip_on_launch
   assign_ipv6_address_on_creation = false
 
@@ -133,12 +132,11 @@ resource "aws_subnet" "public" {
 #
 
 resource "aws_subnet" "private" {
-  count = var.create_vpc && length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
+  count = var.create_vpc && length(var.private_subnets) > 0 && (length(var.private_subnets) <= length(data.aws_availability_zones.azs)) ? length(var.private_subnets) : 0
 
-  vpc_id            = local.vpc_id
-  cidr_block        = var.private_subnets[count.index]
-  availability_zone = data.aws_availability_zones.azs.names[count.index]
-  #  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  vpc_id                          = local.vpc_id
+  cidr_block                      = var.private_subnets[count.index]
+  availability_zone               = data.aws_availability_zones.azs.names[count.index]
   assign_ipv6_address_on_creation = false
 
   tags = merge(
@@ -159,12 +157,11 @@ resource "aws_subnet" "private" {
 #
 
 resource "aws_subnet" "isolated" {
-  count = var.create_vpc && length(var.isolated_subnets) > 0 ? length(var.isolated_subnets) : 0
+  count = var.create_vpc && length(var.isolated_subnets) > 0 && (length(var.isolated_subnets) <= length(data.aws_availability_zones.azs)) ? length(var.isolated_subnets) : 0
 
-  vpc_id            = local.vpc_id
-  cidr_block        = var.isolated_subnets[count.index]
-  availability_zone = data.aws_availability_zones.azs.names[count.index]
-  #  availability_zone_id            = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+  vpc_id                          = local.vpc_id
+  cidr_block                      = var.isolated_subnets[count.index]
+  availability_zone               = data.aws_availability_zones.azs.names[count.index]
   assign_ipv6_address_on_creation = false
 
   tags = merge(
