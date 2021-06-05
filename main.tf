@@ -131,6 +131,42 @@ resource "aws_route" "public_internet_gateway" {
 }
 
 #
+# PRIVATE ROUTES
+#
+
+resource "aws_route_table" "private" {
+  count = var.create_vpc && length(var.private_subnets) > 0 ? 1 : 0
+
+  vpc_id = local.vpc_id
+
+  tags = merge(
+    {
+      "Name" = format("%s-${var.private_subnet_suffix}-rt", var.name)
+    },
+    var.tags,
+    var.private_route_table_tags,
+  )
+}
+
+#
+# ISOLATED ROUTE TABLE
+#
+
+resource "aws_route_table" "isolated" {
+  count = var.create_vpc && length(var.isolated_subnets) > 0 ? 1 : 0
+
+  vpc_id = local.vpc_id
+
+  tags = merge(
+    {
+      "Name" = format("%s-${var.isolated_subnet_suffix}-rt", var.name)
+    },
+    var.tags,
+    var.isolated_route_table_tags,
+  )
+}
+
+
 # PUBLIC SUBNETS
 #
 resource "aws_subnet" "public" {

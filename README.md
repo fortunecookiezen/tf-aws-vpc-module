@@ -10,9 +10,15 @@ Please use the official [aws vpc terraform module](https://registry.terraform.io
 
 * DRY: Don't Repeat Yourself, at least as much as you can because Terraform isn't an actual programming language
 
+## implementation details
+
+* NACLs are pretty wide open: public and private subnets have permissive nacls, isolated subnets do not.
+
+* Security groups are not a part of this. They belong with the member resources. When I get around to adding endpoint support, the endpoint security group will be a part of this module, see reason.
+
 ## usage
 
-See examples
+See `./examples/`
 
 ``` shell
 module "vpc" {
