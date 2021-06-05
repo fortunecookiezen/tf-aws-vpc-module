@@ -4,6 +4,12 @@ Mostly as a test for ci/cd, terraform cloud, and sentinel development.
 
 Please use the official [aws vpc terraform module](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest) instead.
 
+## module principles
+
+* Inherit your configuragion from your environment: this module uses terraform data structures to determine the number of availability zones of the region it is in. As long as you keep `length(var.subnets) <= length(data.aws_availability_zones.azs)` it can deploy in any region.
+
+* DRY: Don't Repeat Yourself, at least as much as you can because Terraform isn't an actual programming language
+
 ## usage
 
 See examples
@@ -31,8 +37,3 @@ module "vpc" {
 }
 
 ```
-
-## module principles
-
-* Inherit your configuragion from your environment: this module uses terraform data structures to determine the number of availability zones of the region it is in. As long as you keep `length(var.subnets) <= length(data.aws_availability_zones.azs)` it can deploy in any region
-
