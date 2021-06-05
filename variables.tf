@@ -122,6 +122,12 @@ variable "private_route_table_tags" {
   default     = {}
 }
 
+variable "isolated_route_table_tags" {
+  description = "Additional tags for the isolated route tables"
+  type        = map(string)
+  default     = {}
+}
+
 variable "public_subnet_tags" {
   description = "Additional tags for the public subnets"
   type        = map(string)
@@ -142,6 +148,24 @@ variable "isolated_subnet_tags" {
 
 variable "igw_tags" {
   description = "Additional tags for the internet gateway"
+  type        = map(string)
+  default     = {}
+}
+
+variable "public_acl_tags" {
+  description = "Additional tags for the public subnets network ACL"
+  type        = map(string)
+  default     = {}
+}
+
+variable "private_acl_tags" {
+  description = "Additional tags for the private subnets network ACL"
+  type        = map(string)
+  default     = {}
+}
+
+variable "isolated_acl_tags" {
+  description = "Additional tags for the isolated subnets network ACL"
   type        = map(string)
   default     = {}
 }

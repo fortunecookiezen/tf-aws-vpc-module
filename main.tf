@@ -111,7 +111,7 @@ resource "aws_route_table" "public" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.public_subnet_suffix}", var.name)
+      "Name" = format("%s-${var.public_subnet_suffix}-rt", var.name)
     },
     var.tags,
     var.public_route_table_tags,
@@ -202,5 +202,43 @@ resource "aws_subnet" "isolated" {
     },
     var.tags,
     var.isolated_subnet_tags,
+  )
+}
+
+#
+# NACLS
+#
+
+resource "aws_network_acl" "public" {
+  count = var.create_vpc && length(var.public_subnets) > 0 ? 1 : 0
+
+  vpc_id     = element(concat(aws_vpc.this.*.id, [""]), 0)
+  subnet_ids = aws_subnet.public.*.id
+
+  # ingress {
+  #   protocol   = -1
+  #   rule_no    = 100
+  #   action     = "allow"
+  #   cidr_block = "0.0.0.0/0"
+  #   from_port  = 0
+  #   to_port    = 0
+  # }
+
+  # egress {
+  #   protocol   = -1
+  #   rule_no    = 100
+  #   action     = "allow"
+  #   cidr_block = "0.0.0.0/0"
+  #   from_port  = 0
+  #   to_port    = 0
+  # }
+
+
+  tags = merge(
+    {
+      "Name" = format("%s-${var.public_subnet_suffix}-nacl", var.name)
+    },
+    var.tags,
+    var.public_acl_tags,
   )
 }
