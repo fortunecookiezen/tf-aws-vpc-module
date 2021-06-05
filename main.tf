@@ -118,6 +118,14 @@ resource "aws_route_table" "public" {
   )
 }
 
+resource "aws_route_table_association" "public" {
+  count = var.create_vpc && length(var.public_subnets) > 0 ? length(var.public_subnets) : 0
+
+  subnet_id      = element(aws_subnet.public.*.id, count.index)
+  route_table_id = aws_route_table.public[0].id
+}
+
+
 resource "aws_route" "public_internet_gateway" {
   count = var.create_vpc && var.create_igw && length(var.public_subnets) > 0 ? 1 : 0
 
@@ -148,6 +156,14 @@ resource "aws_route_table" "private" {
   )
 }
 
+resource "aws_route_table_association" "private" {
+  count = var.create_vpc && length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
+
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  route_table_id = aws_route_table.private[0].id
+}
+
+
 #
 # ISOLATED ROUTE TABLE
 #
@@ -165,6 +181,14 @@ resource "aws_route_table" "isolated" {
     var.isolated_route_table_tags,
   )
 }
+
+resource "aws_route_table_association" "isolated" {
+  count = var.create_vpc && length(var.isolated_subnets) > 0 ? length(var.isolated_subnets) : 0
+
+  subnet_id      = element(aws_subnet.isolated.*.id, count.index)
+  route_table_id = aws_route_table.isolated[0].id
+}
+
 
 
 # PUBLIC SUBNETS
