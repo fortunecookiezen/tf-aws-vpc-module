@@ -110,6 +110,18 @@ variable "vpc_tags" {
   default     = {}
 }
 
+variable "public_route_table_tags" {
+  description = "Additional tags for the public route tables"
+  type        = map(string)
+  default     = {}
+}
+
+variable "private_route_table_tags" {
+  description = "Additional tags for the private route tables"
+  type        = map(string)
+  default     = {}
+}
+
 variable "public_subnet_tags" {
   description = "Additional tags for the public subnets"
   type        = map(string)
