@@ -10,8 +10,13 @@ module "vpc" {
   isolated_subnets = ["10.10.8.0/24", "10.10.9.0/24", "10.10.10.0/24", "10.10.11.0/24"]
 
   private_route_table_routes = [
-    { "cidr_block" : "10.0.0.0/8",
-      "transit_gateway_id" = "tgw-005ea974aa5468d79"
+    {
+      "cidr_block" : "10.0.0.0/8",
+      "transit_gateway_id" : "tgw-005ea974aa5468d79"
+    },
+    {
+      "destination_prefix_list_id" : "pl-63a5400a",
+      "transit_gateway_id" : "tgw-005ea974aa5468d79"
     }
   ]
 

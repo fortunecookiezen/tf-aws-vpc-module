@@ -113,7 +113,8 @@ resource "aws_route_table" "public" {
     for_each = var.public_route_table_routes
     content {
       # One of the following destinations must be provided
-      cidr_block = route.value.cidr_block
+      cidr_block                 = lookup(route.value, "cidr_block", null)
+      destination_prefix_list_id = lookup(route.value, "destination_prefix_list_id", null)
 
       # One of the following targets must be provided
       gateway_id                = lookup(route.value, "gateway_id", null)
@@ -168,7 +169,8 @@ resource "aws_route_table" "private" {
     for_each = var.private_route_table_routes
     content {
       # One of the following destinations must be provided
-      cidr_block = route.value.cidr_block
+      cidr_block                 = lookup(route.value, "cidr_block", null)
+      destination_prefix_list_id = lookup(route.value, "destination_prefix_list_id", null)
 
       # One of the following targets must be provided
       gateway_id                = lookup(route.value, "gateway_id", null)
