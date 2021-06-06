@@ -109,24 +109,6 @@ resource "aws_route_table" "public" {
 
   vpc_id = local.vpc_id
 
-  dynamic "route" { #this really shouldn't be used, because honestly you should only need a default route in a public sub
-    for_each = var.public_route_table_routes
-    content {
-      # One of the following destinations must be provided
-      cidr_block                 = lookup(route.value, "cidr_block", null)
-      destination_prefix_list_id = lookup(route.value, "destination_prefix_list_id", null)
-
-      # One of the following targets must be provided
-      gateway_id                = lookup(route.value, "gateway_id", null)
-      instance_id               = lookup(route.value, "instance_id", null)
-      nat_gateway_id            = lookup(route.value, "nat_gateway_id", null)
-      network_interface_id      = lookup(route.value, "network_interface_id", null)
-      transit_gateway_id        = lookup(route.value, "transit_gateway_id", null)
-      vpc_endpoint_id           = lookup(route.value, "vpc_endpoint_id", null)
-      vpc_peering_connection_id = lookup(route.value, "vpc_peering_connection_id", null)
-    }
-  }
-
   tags = merge(
     {
       "Name" = format("%s-${var.public_subnet_suffix}-rt", var.name)
@@ -224,6 +206,34 @@ resource "aws_route_table_association" "isolated" {
   subnet_id      = element(aws_subnet.isolated.*.id, count.index)
   route_table_id = aws_route_table.isolated[0].id
 }
+
+
+# resource "aws_route" "isolated" {
+#   count = length(var.private_route_table_routes) > 0 ? length(var.private_route_table_routes) : 0
+
+#   route_table_id = aws_route_table.isolated[0].id
+
+#   dynamic "route" {
+#     content {
+#       # One of the following destinations must be provided
+#       cidr_block                 = lookup(route.value, "cidr_block", null)
+#       destination_prefix_list_id = lookup(route.value, "destination_prefix_list_id", null)
+
+#       # One of the following targets must be provided
+#       gateway_id                = lookup(route.value, "gateway_id", null)
+#       instance_id               = lookup(route.value, "instance_id", null)
+#       nat_gateway_id            = lookup(route.value, "nat_gateway_id", null)
+#       network_interface_id      = lookup(route.value, "network_interface_id", null)
+#       transit_gateway_id        = lookup(route.value, "transit_gateway_id", null)
+#       vpc_endpoint_id           = lookup(route.value, "vpc_endpoint_id", null)
+#       vpc_peering_connection_id = lookup(route.value, "vpc_peering_connection_id", null)
+#     }
+#   }
+
+#   timeouts {
+#     create = "5m"
+#   }
+# }
 
 # PUBLIC SUBNETS
 #
