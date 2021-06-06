@@ -4,7 +4,7 @@ locals {
     length(var.isolated_subnets)
   )
 
-  nat_gateway_count = var.enable_nat_gateway ? 0 : length(var.azs)
+  nat_gateway_count = var.enable_nat_gateway ? 0 : length(var.private_subnets)
 
   # Use `local.vpc_id` to give a hint to Terraform that subnets should be deleted before secondary CIDR blocks can be free!
   vpc_id = element(
@@ -109,6 +109,23 @@ resource "aws_route_table" "public" {
 
   vpc_id = local.vpc_id
 
+  dynamic "route" { #this really shouldn't be used, because honestly you should only need a default route in a public sub
+    for_each = var.public_route_table_routes
+    content {
+      # One of the following destinations must be provided
+      cidr_block = route.value.cidr_block
+
+      # One of the following targets must be provided
+      gateway_id                = lookup(route.value, "gateway_id", null)
+      instance_id               = lookup(route.value, "instance_id", null)
+      nat_gateway_id            = lookup(route.value, "nat_gateway_id", null)
+      network_interface_id      = lookup(route.value, "network_interface_id", null)
+      transit_gateway_id        = lookup(route.value, "transit_gateway_id", null)
+      vpc_endpoint_id           = lookup(route.value, "vpc_endpoint_id", null)
+      vpc_peering_connection_id = lookup(route.value, "vpc_peering_connection_id", null)
+    }
+  }
+
   tags = merge(
     {
       "Name" = format("%s-${var.public_subnet_suffix}-rt", var.name)
@@ -146,6 +163,23 @@ resource "aws_route_table" "private" {
   count = var.create_vpc && length(var.private_subnets) > 0 ? 1 : 0
 
   vpc_id = local.vpc_id
+
+  dynamic "route" {
+    for_each = var.private_route_table_routes
+    content {
+      # One of the following destinations must be provided
+      cidr_block = route.value.cidr_block
+
+      # One of the following targets must be provided
+      gateway_id                = lookup(route.value, "gateway_id", null)
+      instance_id               = lookup(route.value, "instance_id", null)
+      nat_gateway_id            = lookup(route.value, "nat_gateway_id", null)
+      network_interface_id      = lookup(route.value, "network_interface_id", null)
+      transit_gateway_id        = lookup(route.value, "transit_gateway_id", null)
+      vpc_endpoint_id           = lookup(route.value, "vpc_endpoint_id", null)
+      vpc_peering_connection_id = lookup(route.value, "vpc_peering_connection_id", null)
+    }
+  }
 
   tags = merge(
     {
@@ -188,8 +222,6 @@ resource "aws_route_table_association" "isolated" {
   subnet_id      = element(aws_subnet.isolated.*.id, count.index)
   route_table_id = aws_route_table.isolated[0].id
 }
-
-
 
 # PUBLIC SUBNETS
 #

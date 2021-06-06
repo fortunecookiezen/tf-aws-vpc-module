@@ -55,11 +55,11 @@ variable "secondary_cidr_blocks" {
   default     = []
 }
 
-variable "azs" {
-  description = "A list of availability zones names or ids in the region"
-  type        = list(string)
-  default     = []
-}
+# variable "azs" {
+#   description = "A list of availability zones names or ids in the region"
+#   type        = list(string)
+#   default     = []
+# }
 
 variable "public_subnets" {
   description = "A list of public subnets inside the VPC"
@@ -76,6 +76,18 @@ variable "private_subnets" {
 variable "isolated_subnets" {
   description = "A list of non-routable subnets inside the VPC"
   type        = list(string)
+  default     = []
+}
+
+variable "private_route_table_routes" {
+  description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
+  type        = list(map(string))
+  default     = []
+}
+
+variable "public_route_table_routes" {
+  description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
+  type        = list(map(string))
   default     = []
 }
 
@@ -109,6 +121,7 @@ variable "vpc_tags" {
   type        = map(string)
   default     = {}
 }
+
 
 variable "public_route_table_tags" {
   description = "Additional tags for the public route tables"
