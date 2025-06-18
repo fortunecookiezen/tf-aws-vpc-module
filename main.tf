@@ -156,7 +156,6 @@ resource "aws_route_table" "private" {
 
       # One of the following targets must be provided
       gateway_id                = lookup(route.value, "gateway_id", null)
-      instance_id               = lookup(route.value, "instance_id", null)
       nat_gateway_id            = lookup(route.value, "nat_gateway_id", null)
       network_interface_id      = lookup(route.value, "network_interface_id", null)
       transit_gateway_id        = lookup(route.value, "transit_gateway_id", null)
