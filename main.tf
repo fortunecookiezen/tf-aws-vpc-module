@@ -98,10 +98,13 @@ resource "aws_internet_gateway" "this" {
   )
 }
 
-#
-# ROUTES & ROUTE TABLES
-#
+/*
+  ROUTES & ROUTE TABLES
+*/
 
+# This module creates route tables for public, private, isolated, and transit gateway subnets.
+
+# 
 # PUBLIC ROUTES
 #
 resource "aws_route_table" "public" {
@@ -111,7 +114,7 @@ resource "aws_route_table" "public" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.public_subnet_suffix}-rt", var.name)
+      "Name" = format("%s-${var.public_subnet_prefix}-rt", var.name)
     },
     var.tags,
     var.public_route_table_tags,
@@ -166,7 +169,7 @@ resource "aws_route_table" "private" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.private_subnet_suffix}-rt", var.name)
+      "Name" = format("%s-${var.private_subnet_prefix}-rt", var.name)
     },
     var.tags,
     var.private_route_table_tags,
@@ -192,7 +195,7 @@ resource "aws_route_table" "isolated" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.isolated_subnet_suffix}-rt", var.name)
+      "Name" = format("%s-${var.isolated_subnet_prefix}-rt", var.name)
     },
     var.tags,
     var.isolated_route_table_tags,
@@ -204,6 +207,49 @@ resource "aws_route_table_association" "isolated" {
 
   subnet_id      = element(aws_subnet.isolated.*.id, count.index)
   route_table_id = aws_route_table.isolated[0].id
+}
+
+
+#
+# TRANSIT GATEWAY ROUTES
+#
+
+resource "aws_route_table" "transit_gateway" {
+  count = var.create_vpc && length(var.transit_gateway_subnets) > 0 ? 1 : 0
+
+  vpc_id = local.vpc_id
+
+  dynamic "route" {
+    for_each = var.transit_gateway_route_table_routes
+    content {
+      # One of the following destinations must be provided
+      cidr_block                 = lookup(route.value, "cidr_block", null)
+      destination_prefix_list_id = lookup(route.value, "destination_prefix_list_id", null)
+
+      # One of the following targets must be provided
+      gateway_id                = lookup(route.value, "gateway_id", null)
+      nat_gateway_id            = lookup(route.value, "nat_gateway_id", null)
+      network_interface_id      = lookup(route.value, "network_interface_id", null)
+      transit_gateway_id        = lookup(route.value, "transit_gateway_id", null)
+      vpc_endpoint_id           = lookup(route.value, "vpc_endpoint_id", null)
+      vpc_peering_connection_id = lookup(route.value, "vpc_peering_connection_id", null)
+    }
+  }
+
+  tags = merge(
+    {
+      "Name" = format("%s-${var.transit_gateway_subnet_prefix}-rt", var.name)
+    },
+    var.tags,
+    var.transit_gateway_route_table_tags,
+  )
+}
+
+resource "aws_route_table_association" "transit_gateway" {
+  count = var.create_vpc && length(var.transit_gateway_subnets) > 0 ? length(var.transit_gateway_subnets) : 0
+
+  subnet_id      = element(aws_subnet.transit_gateway.*.id, count.index)
+  route_table_id = aws_route_table.transit_gateway[0].id
 }
 
 #
@@ -221,7 +267,7 @@ resource "aws_subnet" "public" {
   tags = merge(
     {
       "Name" = format(
-        "%s-${var.public_subnet_suffix}-%s",
+        "%s-${var.public_subnet_prefix}-%s",
         var.name,
         data.aws_availability_zones.azs.names[count.index]
       )
@@ -246,7 +292,7 @@ resource "aws_subnet" "private" {
   tags = merge(
     {
       "Name" = format(
-        "%s-${var.private_subnet_suffix}-%s",
+        "%s-${var.private_subnet_prefix}-%s",
         var.name,
         data.aws_availability_zones.azs.names[count.index]
       )
@@ -271,13 +317,38 @@ resource "aws_subnet" "isolated" {
   tags = merge(
     {
       "Name" = format(
-        "%s-${var.isolated_subnet_suffix}-%s",
+        "%s-${var.isolated_subnet_prefix}-%s",
         var.name,
         data.aws_availability_zones.azs.names[count.index]
       )
     },
     var.tags,
     var.isolated_subnet_tags,
+  )
+}
+
+#
+# TRANSIT GATEWAY SUBNETS
+#
+
+resource "aws_subnet" "transit_gateway" {
+  count = var.create_vpc && length(var.transit_gateway_subnets) > 0 && (length(var.transit_gateway_subnets) <= length(data.aws_availability_zones.azs)) ? length(var.transit_gateway_subnets) : 0
+
+  vpc_id                          = local.vpc_id
+  cidr_block                      = var.transit_gateway_subnets[count.index]
+  availability_zone               = data.aws_availability_zones.azs.names[count.index]
+  assign_ipv6_address_on_creation = false
+
+  tags = merge(
+    {
+      "Name" = format(
+        "%s-${var.transit_gateway_subnet_prefix}-%s",
+        var.name,
+        data.aws_availability_zones.azs.names[count.index]
+      )
+    },
+    var.tags,
+    var.transit_gateway_subnet_tags,
   )
 }
 
@@ -311,7 +382,7 @@ resource "aws_network_acl" "public" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.public_subnet_suffix}-nacl", var.name)
+      "Name" = format("%s-${var.public_subnet_prefix}-nacl", var.name)
     },
     var.tags,
     var.public_acl_tags,
@@ -344,7 +415,7 @@ resource "aws_network_acl" "private" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.private_subnet_suffix}-nacl", var.name)
+      "Name" = format("%s-${var.private_subnet_prefix}-nacl", var.name)
     },
     var.tags,
     var.private_acl_tags,
@@ -377,9 +448,39 @@ resource "aws_network_acl" "isolated" {
 
   tags = merge(
     {
-      "Name" = format("%s-${var.isolated_subnet_suffix}-nacl", var.name)
+      "Name" = format("%s-${var.isolated_subnet_prefix}-nacl", var.name)
     },
     var.tags,
     var.isolated_acl_tags,
+  )
+}
+
+resource "aws_network_acl" "transit_gateway" {
+  count = var.create_vpc && length(var.transit_gateway_subnets) > 0 ? 1 : 0
+
+  vpc_id     = element(concat(aws_vpc.this.*.id, [""]), 0)
+  subnet_ids = aws_subnet.transit_gateway.*.id
+  ingress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = aws_vpc.this[0].cidr_block
+    from_port  = 0
+    to_port    = 0
+  }
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+  tags = merge(
+    {
+      "Name" = format("%s-${var.transit_gateway_subnet_prefix}-nacl", var.name)
+    },
+    var.tags,
+    var.transit_gateway_acl_tags,
   )
 }

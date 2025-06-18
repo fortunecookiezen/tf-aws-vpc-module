@@ -79,28 +79,58 @@ variable "isolated_subnets" {
   default     = []
 }
 
+variable "transit_gateway_subnets" {
+  description = "A list of subnets to associate with the transit gateway"
+  type        = list(string)
+  default     = []
+}
+
+variable "transit_gateway_id" {
+  description = "The ID of the transit gateway to associate with the VPC"
+  type        = string
+  default     = ""
+}
+
+variable "public_route_table_routes" {
+  description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
+  type        = list(map(string))
+  default     = []
+}
+
 variable "private_route_table_routes" {
   description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
   type        = list(map(string))
   default     = []
 }
 
-variable "public_subnet_suffix" {
-  description = "Suffix to append to public subnets name"
+variable "transit_gateway_route_table_routes" {
+  description = "Configuration block of routes. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_route_table#route"
+  type        = list(map(string))
+  default     = []
+}
+
+variable "public_subnet_prefix" {
+  description = "prefix to prepend to public subnets name"
   type        = string
   default     = "public"
 }
 
-variable "private_subnet_suffix" {
-  description = "Suffix to append to private subnets name"
+variable "private_subnet_prefix" {
+  description = "prefix to prepend to private subnets name"
   type        = string
   default     = "private"
 }
 
-variable "isolated_subnet_suffix" {
-  description = "Suffix to append to outpost subnets name"
+variable "isolated_subnet_prefix" {
+  description = "prefix to prepend to isolated subnets name"
   type        = string
   default     = "isolated"
+}
+
+variable "transit_gateway_subnet_prefix" {
+  description = "prefix to prepend to transit gateway subnets name"
+  type        = string
+  default     = "tgw"
 }
 
 # maps
@@ -135,6 +165,12 @@ variable "isolated_route_table_tags" {
   default     = {}
 }
 
+variable "transit_gateway_route_table_tags" {
+  description = "Additional tags for the transit gateway route tables"
+  type        = map(string)
+  default     = {}
+}
+
 variable "public_subnet_tags" {
   description = "Additional tags for the public subnets"
   type        = map(string)
@@ -149,6 +185,12 @@ variable "private_subnet_tags" {
 
 variable "isolated_subnet_tags" {
   description = "Additional tags for the isolated subnets"
+  type        = map(string)
+  default     = {}
+}
+
+variable "transit_gateway_subnet_tags" {
+  description = "Additional tags for the transit gateway subnets"
   type        = map(string)
   default     = {}
 }
@@ -173,6 +215,12 @@ variable "private_acl_tags" {
 
 variable "isolated_acl_tags" {
   description = "Additional tags for the isolated subnets network ACL"
+  type        = map(string)
+  default     = {}
+}
+
+variable "transit_gateway_acl_tags" {
+  description = "Additional tags for the transit gateway subnets network ACL"
   type        = map(string)
   default     = {}
 }
