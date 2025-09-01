@@ -27,7 +27,7 @@ resource "aws_vpc" "this" {
   tags = merge(
     {
       "Name"   = format("%s", var.name)
-      "Region" = format("%s", data.aws_region.current.name)
+      "Region" = format("%s", data.aws_region.current.region)
     },
     var.tags,
     var.vpc_tags,
@@ -464,7 +464,7 @@ resource "aws_network_acl" "transit_gateway" {
     protocol   = -1
     rule_no    = 100
     action     = "allow"
-    cidr_block = aws_vpc.this[0].cidr_block
+    cidr_block = "0.0.0.0/0"
     from_port  = 0
     to_port    = 0
   }
